@@ -10,11 +10,13 @@ using Windows.UI.Xaml.Controls;
 // Arduino Uno - A0 on Pin 14
 // http://www.microsofttranslator.com/bv.aspx?from=&to=en&a=http%3A%2F%2Fblogs.msdn.com%2Fb%2Fsos%2Farchive%2F2015%2F07%2F11%2Fwindows-remote-arduino-creating-lamp-controlled-by-universal-windows-app.aspx
 
-namespace RemoteArduino {
+namespace RemoteArduino
+{
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : Page {
+    public sealed partial class MainPage : Page
+    {
         UsbSerial usbcomm;
         RemoteDevice arduino;
         DispatcherTimer dt;
@@ -26,12 +28,15 @@ namespace RemoteArduino {
 
         bool auto_mode = false;
 
-        public MainPage() {
+        public MainPage()
+        {
             this.InitializeComponent();
             connect();
+            ConnectNetwork();
         }
 
-        private async void connect() {
+        private async void connect()
+        {
             dt = new DispatcherTimer() { Interval = new TimeSpan(500) };
             dt.Tick += loop;
 
@@ -42,20 +47,26 @@ namespace RemoteArduino {
             usbcomm.begin(57600, SerialConfig.SERIAL_8N1);
         }
 
-        private void Comm_ConnectionEstablished() {
-            var action = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(() => {
+        private void Comm_ConnectionEstablished()
+        {
+            var action = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(() =>
+            {
                 arduino.pinMode(relay_pin, PinMode.OUTPUT);
                 arduino.pinMode(led_pin, PinMode.OUTPUT);
+
                 dt.Start();
+
                 on.IsEnabled = true;
                 off.IsEnabled = true;
                 auto.IsEnabled = true;
-                // auto_mode = true;
+                auto_mode = true;
             }));
         }
 
-        private void loop(object sender, object e) {
-            if (auto_mode) {
+        private void loop(object sender, object e)
+        {
+            if (auto_mode)
+            {
                 arduino.pinMode(A0_pin, PinMode.ANALOG);
                 var reading = arduino.analogRead(0);
 
@@ -67,39 +78,48 @@ namespace RemoteArduino {
             }
         }
 
-        private void on_Click(object sender, RoutedEventArgs e) {
+        private void on_Click(object sender, RoutedEventArgs e)
+        {
             OnAction();
         }
 
-        private void off_Click(object sender, RoutedEventArgs e) {
+        private void off_Click(object sender, RoutedEventArgs e)
+        {
             OffAction();
         }
 
-        private void OnAction() {
+        private void OnAction()
+        {
             auto_mode = false;
             arduino.digitalWrite(relay_pin, PinState.HIGH);
             arduino.digitalWrite(led_pin, PinState.HIGH);
         }
 
-        private void OffAction() {
+        private void OffAction()
+        {
             auto_mode = false;
             arduino.digitalWrite(relay_pin, PinState.LOW);
             arduino.digitalWrite(led_pin, PinState.LOW);
         }
 
-        private void auto_Click(object sender, RoutedEventArgs e) {
+        private void auto_Click(object sender, RoutedEventArgs e)
+        {
             auto_mode = true;
         }
 
-        void ConnectNetworkng() {
+        void ConnectNetwork()
+        {
             relay = new VirtualRelay("relay01");
             relay.OnEvent += Relay_OnEvent;
             Util.StartNetworkServices(true);
         }
 
-        private void Relay_OnEvent(object sender, EventArgs e) {
+        private void Relay_OnEvent(object sender, EventArgs e)
+        {
+            auto_mode = true;
             var a = ((VirtualRelay.RelayEventArg)e).action;
-            switch (a) {
+            switch (a)
+            {
                 case VirtualRelay.Actions.On:
                     OnAction();
                     break;
