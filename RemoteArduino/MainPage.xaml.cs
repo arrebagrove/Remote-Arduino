@@ -16,7 +16,11 @@ namespace RemoteArduino {
         UsbSerial usbcomm;
         RemoteDevice arduino;
         DispatcherTimer dt;
+
         byte relay_pin = 7;
+        byte led_pin = 3;
+        byte A0_pin = 14;
+
         bool auto_mode = false;
 
         public MainPage() {
@@ -38,6 +42,7 @@ namespace RemoteArduino {
         private void Comm_ConnectionEstablished() {
             var action = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(() => {
                 arduino.pinMode(relay_pin, PinMode.OUTPUT);
+                arduino.pinMode(led_pin, PinMode.OUTPUT);
                 dt.Start();
                 on.IsEnabled = true;
                 off.IsEnabled = true;
@@ -48,24 +53,27 @@ namespace RemoteArduino {
 
         private void loop(object sender, object e) {
             if (auto_mode) {
-                arduino.pinMode(14, PinMode.ANALOG);
+                arduino.pinMode(A0_pin, PinMode.ANALOG);
                 var reading = arduino.analogRead(0);
 
                 Debug.WriteLine(reading.ToString());
 
                 var on = reading < 512;
                 arduino.digitalWrite(relay_pin, on ? PinState.HIGH : PinState.LOW);
+                arduino.digitalWrite(led_pin, on ? PinState.HIGH : PinState.LOW);
             }
         }
 
         private void on_Click(object sender, RoutedEventArgs e) {
             auto_mode = false;
             arduino.digitalWrite(relay_pin, PinState.HIGH);
+            arduino.digitalWrite(led_pin, PinState.HIGH);
         }
 
         private void off_Click(object sender, RoutedEventArgs e) {
             auto_mode = false;
             arduino.digitalWrite(relay_pin, PinState.LOW);
+            arduino.digitalWrite(led_pin, PinState.LOW);
         }
 
         private void auto_Click(object sender, RoutedEventArgs e) {
