@@ -1,4 +1,6 @@
-﻿using Microsoft.Maker.RemoteWiring;
+﻿using Glovebox.IoT;
+using Glovebox.IoT.Actuators;
+using Microsoft.Maker.RemoteWiring;
 using Microsoft.Maker.Serial;
 using System;
 using System.Diagnostics;
@@ -16,6 +18,7 @@ namespace RemoteArduino {
         UsbSerial usbcomm;
         RemoteDevice arduino;
         DispatcherTimer dt;
+        VirtualRelay relay;
 
         byte relay_pin = 7;
         byte led_pin = 3;
@@ -65,12 +68,20 @@ namespace RemoteArduino {
         }
 
         private void on_Click(object sender, RoutedEventArgs e) {
+            OnAction();
+        }
+
+        private void off_Click(object sender, RoutedEventArgs e) {
+            OffAction();
+        }
+
+        private void OnAction() {
             auto_mode = false;
             arduino.digitalWrite(relay_pin, PinState.HIGH);
             arduino.digitalWrite(led_pin, PinState.HIGH);
         }
 
-        private void off_Click(object sender, RoutedEventArgs e) {
+        private void OffAction() {
             auto_mode = false;
             arduino.digitalWrite(relay_pin, PinState.LOW);
             arduino.digitalWrite(led_pin, PinState.LOW);
@@ -78,6 +89,24 @@ namespace RemoteArduino {
 
         private void auto_Click(object sender, RoutedEventArgs e) {
             auto_mode = true;
+        }
+
+        void ConnectNetworkng() {
+            relay = new VirtualRelay("relay01");
+            relay.OnEvent += Relay_OnEvent;
+            Util.StartNetworkServices(true);
+        }
+
+        private void Relay_OnEvent(object sender, EventArgs e) {
+            var a = ((VirtualRelay.RelayEventArg)e).action;
+            switch (a) {
+                case VirtualRelay.Actions.On:
+                    OnAction();
+                    break;
+                case VirtualRelay.Actions.Off:
+                    OffAction();
+                    break;
+            }
         }
     }
 }
