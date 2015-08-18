@@ -29,6 +29,7 @@ namespace RemoteArduino {
 
         byte relay_pin = 7;
         byte led_pin = 3;
+        VirtualLDR.UnoAnalogPins ldr_pin = VirtualLDR.UnoAnalogPins.A0;
 
         bool auto_mode = false;
 
@@ -58,7 +59,7 @@ namespace RemoteArduino {
 
                 relay = new VirtualRelay(arduino, relay_pin, "relay01");
                 led = new VirtualLed(arduino, led_pin, "led01");
-                ldr = new VirtualLDR(arduino, VirtualLDR.UnoAnalogPins.A0, Timeout.Infinite, "light01");
+                ldr = new VirtualLDR(arduino, ldr_pin, Timeout.Infinite, "light01");
 
                 dt.Start();
 
