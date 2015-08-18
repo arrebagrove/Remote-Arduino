@@ -1,132 +1,101 @@
-﻿using Glovebox.IoT;
-using Glovebox.IoT.Actuators;
+﻿using Glovebox.IO.VirtualArduino.Actuators;
+using Glovebox.IO.VirtualArduino.Sensors;
+using Glovebox.IoT;
 using Microsoft.Maker.RemoteWiring;
 using Microsoft.Maker.Serial;
 using System;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
 // Arduino Uno - A0 on Pin 14
 // http://www.microsofttranslator.com/bv.aspx?from=&to=en&a=http%3A%2F%2Fblogs.msdn.com%2Fb%2Fsos%2Farchive%2F2015%2F07%2F11%2Fwindows-remote-arduino-creating-lamp-controlled-by-universal-windows-app.aspx
 
-namespace RemoteArduino
-{
+namespace RemoteArduino {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : Page
-    {
-        UsbSerial usbcomm;
+    public sealed partial class MainPage : Page {
+        UsbSerial connection;
         RemoteDevice arduino;
+
         DispatcherTimer dt;
+
         VirtualRelay relay;
+        VirtualLed led;
+        VirtualLDR ldr;
 
         byte relay_pin = 7;
         byte led_pin = 3;
-        byte A0_pin = 14;
 
         bool auto_mode = false;
 
-        public MainPage()
-        {
+        public MainPage() {
             this.InitializeComponent();
             connect();
-            ConnectNetwork();
+
+            Util.StartNetworkServices(true);
         }
 
-        private async void connect()
-        {
+        private void connect() {
             dt = new DispatcherTimer() { Interval = new TimeSpan(500) };
             dt.Tick += loop;
 
-            var dev = await UsbSerial.listAvailableDevicesAsync();
-            usbcomm = new UsbSerial(dev[0]);
-            arduino = new RemoteDevice(usbcomm);
-            usbcomm.ConnectionEstablished += Comm_ConnectionEstablished;
-            usbcomm.begin(57600, SerialConfig.SERIAL_8N1);
+            //var dev = await UsbSerial.listAvailableDevicesAsync();
+            //usbcomm = new UsbSerial(dev[0]);
+
+            connection = new UsbSerial("VID_2341", "PID_0043");
+
+            arduino = new RemoteDevice(connection);
+            connection.ConnectionEstablished += Connection_ConnectionEstablished;
+            connection.begin(250000, SerialConfig.SERIAL_8N1);
         }
 
-        private void Comm_ConnectionEstablished()
-        {
-            var action = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(() =>
-            {
-                arduino.pinMode(relay_pin, PinMode.OUTPUT);
-                arduino.pinMode(led_pin, PinMode.OUTPUT);
+        private void Connection_ConnectionEstablished() {
+            var action = Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, new Windows.UI.Core.DispatchedHandler(() => {
+
+                relay = new VirtualRelay(arduino, relay_pin, "relay01");
+                led = new VirtualLed(arduino, led_pin, "led01");
+                ldr = new VirtualLDR(arduino, VirtualLDR.UnoAnalogPins.A0, Timeout.Infinite, "light01");
 
                 dt.Start();
 
                 on.IsEnabled = true;
                 off.IsEnabled = true;
                 auto.IsEnabled = true;
-                auto_mode = true;
+               // auto_mode = true;
             }));
         }
 
-        private void loop(object sender, object e)
-        {
-            if (auto_mode)
-            {
-                arduino.pinMode(A0_pin, PinMode.ANALOG);
-                var reading = arduino.analogRead(0);
-
-                Debug.WriteLine(reading.ToString());
-
-                var on = reading < 512;
-                arduino.digitalWrite(relay_pin, on ? PinState.HIGH : PinState.LOW);
-                arduino.digitalWrite(led_pin, on ? PinState.HIGH : PinState.LOW);
+        private void loop(object sender, object e) {
+            if (auto_mode) {
+                if (ldr.Current < 512) {
+                    relay.On();
+                    led.On();
+                }
+                else {
+                    relay.Off();
+                    led.Off();
+                }
             }
         }
 
-        private void on_Click(object sender, RoutedEventArgs e)
-        {
-            OnAction();
-        }
-
-        private void off_Click(object sender, RoutedEventArgs e)
-        {
-            OffAction();
-        }
-
-        private void OnAction()
-        {
+        private void on_Click(object sender, RoutedEventArgs e) {
             auto_mode = false;
-            arduino.digitalWrite(relay_pin, PinState.HIGH);
-            arduino.digitalWrite(led_pin, PinState.HIGH);
+            relay.On();
+            led.On();
         }
 
-        private void OffAction()
-        {
+        private void off_Click(object sender, RoutedEventArgs e) {
             auto_mode = false;
-            arduino.digitalWrite(relay_pin, PinState.LOW);
-            arduino.digitalWrite(led_pin, PinState.LOW);
+            relay.Off();
+            led.Off();
         }
 
-        private void auto_Click(object sender, RoutedEventArgs e)
-        {
+        private void auto_Click(object sender, RoutedEventArgs e) {
             auto_mode = true;
-        }
-
-        void ConnectNetwork()
-        {
-            relay = new VirtualRelay("relay01");
-            relay.OnEvent += Relay_OnEvent;
-            Util.StartNetworkServices(true);
-        }
-
-        private void Relay_OnEvent(object sender, EventArgs e)
-        {
-            auto_mode = true;
-            var a = ((VirtualRelay.RelayEventArg)e).action;
-            switch (a)
-            {
-                case VirtualRelay.Actions.On:
-                    OnAction();
-                    break;
-                case VirtualRelay.Actions.Off:
-                    OffAction();
-                    break;
-            }
         }
     }
 }

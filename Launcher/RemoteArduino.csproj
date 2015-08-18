@@ -136,6 +136,10 @@
     </SDKReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Glovebox.IO.VirtualArduino\Glovebox.IO.VirtualArduino.csproj">
+      <Project>{07c837a2-5353-4e6a-ae69-ed17033a84c1}</Project>
+      <Name>Glovebox.IO.VirtualArduino</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Glovebox.IoT\Glovebox.IoT.csproj">
       <Project>{38ac3d42-9830-4062-a294-a07f8e107301}</Project>
       <Name>Glovebox.IoT</Name>
