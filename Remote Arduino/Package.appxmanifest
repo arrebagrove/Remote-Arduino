@@ -7,14 +7,14 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="1b7fd15f-cdcb-4911-bbaf-ffa8db53756b"
+    Name="60174e46-20b2-415d-b9f6-816232c7277e"
     Publisher="CN=dglov"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="1b7fd15f-cdcb-4911-bbaf-ffa8db53756b" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="60174e46-20b2-415d-b9f6-816232c7277e" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>RemoteArduino</DisplayName>
+    <DisplayName>Remote Arduino</DisplayName>
     <PublisherDisplayName>dglov</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -30,12 +30,12 @@
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="RemoteArduino.App">
+      EntryPoint="Remote_Arduino.App">
       <uap:VisualElements
-        DisplayName="RemoteArduino"
+        DisplayName="Remote Arduino"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="RemoteArduino"
+        Description="Remote Arduino"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
@@ -44,12 +44,6 @@
   </Applications>
 
   <Capabilities>
-    <Capability Name="privateNetworkClientServer"/>
-    <Capability Name="internetClientServer"/>
-    <DeviceCapability Name="serialcommunication">
-      <Device Id="any">
-        <Function Type="name:serialPort"/>
-      </Device>
-    </DeviceCapability>
+    <Capability Name="internetClient" />
   </Capabilities>
 </Package>

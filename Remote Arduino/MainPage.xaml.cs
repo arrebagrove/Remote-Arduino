@@ -4,16 +4,13 @@ using Glovebox.IoT;
 using Microsoft.Maker.RemoteWiring;
 using Microsoft.Maker.Serial;
 using System;
-using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
-// Arduino Uno - A0 on Pin 14
-// http://www.microsofttranslator.com/bv.aspx?from=&to=en&a=http%3A%2F%2Fblogs.msdn.com%2Fb%2Fsos%2Farchive%2F2015%2F07%2F11%2Fwindows-remote-arduino-creating-lamp-controlled-by-universal-windows-app.aspx
+// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace RemoteArduino {
+namespace Remote_Arduino {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
@@ -37,7 +34,7 @@ namespace RemoteArduino {
             this.InitializeComponent();
             connect();
 
-            Util.StartNetworkServices(true);
+          //  Util.StartNetworkServices(true);
         }
 
         private void connect() {
@@ -46,13 +43,13 @@ namespace RemoteArduino {
 
             //useful when running on Raspberry Pi 2 on Windows 10 for IoT and getting the vid and pid not so easy
             //var dev = await UsbSerial.listAvailableDevicesAsync();
-            //usbcomm = new UsbSerial(dev[0]);
+            //connection = new UsbSerial(dev[0]);
 
             connection = new UsbSerial("VID_2341", "PID_0043");
 
             arduino = new RemoteDevice(connection);
             connection.ConnectionEstablished += Connection_ConnectionEstablished;
-            connection.begin(250000, SerialConfig.SERIAL_8N1);
+            connection.begin(57600, SerialConfig.SERIAL_8N1);
         }
 
         private void Connection_ConnectionEstablished() {
@@ -67,7 +64,7 @@ namespace RemoteArduino {
                 on.IsEnabled = true;
                 off.IsEnabled = true;
                 auto.IsEnabled = true;
-               // auto_mode = true;
+                // auto_mode = true;
             }));
         }
 
