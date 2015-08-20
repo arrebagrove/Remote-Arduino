@@ -41,7 +41,7 @@ namespace Remote_Arduino {
             dt = new DispatcherTimer() { Interval = new TimeSpan(500) };
             dt.Tick += loop;
 
-            //useful when running on Raspberry Pi 2 on Windows 10 for IoT and getting the vid and pid not so easy
+            //useful when running on Raspberry Pi 2 on Windows 10 for IoT
             //var dev = await UsbSerial.listAvailableDevicesAsync();
             //connection = new UsbSerial(dev[0]);
 
